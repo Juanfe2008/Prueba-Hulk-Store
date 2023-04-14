@@ -10,7 +10,6 @@ import lombok.experimental.Accessors;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Accessors(fluent = true)
 public class CarDto {
 
     @JsonProperty("idUser")

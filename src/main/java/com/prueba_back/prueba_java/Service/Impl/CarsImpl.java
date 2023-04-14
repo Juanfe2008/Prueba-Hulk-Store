@@ -11,6 +11,8 @@ import com.prueba_back.prueba_java.Repository.ProductRepository;
 import com.prueba_back.prueba_java.Repository.UserRepository;
 import com.prueba_back.prueba_java.Response.ResponseGeneric;
 import com.prueba_back.prueba_java.Service.ServiceCars;
+import com.prueba_back.prueba_java.Utils.OperationKardex;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,26 +22,29 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor
 public class CarsImpl implements ServiceCars {
 
-    @Autowired
-    CarsRepository carRepository;
 
-    @Autowired
-    KardexRepository kardexRepository;
+    private final CarsRepository carRepository;
 
-    @Autowired
-    ProductRepository productRepository;
 
-    @Autowired
-    UserRepository userRepository;
+    private final KardexRepository kardexRepository;
+
+
+    private final ProductRepository productRepository;
+
+
+    private final UserRepository userRepository;
+
+    private final OperationKardex operationKardex;
 
     @Override
     public ResponseGeneric save(CarDto car) {
         try{
             Cars cars1 = new Cars();
 
-            if (Objects.isNull(car.idProduct())){
+            if (Objects.isNull(car.getIdProduct())){
                 return ResponseGeneric
                         .builder()
                         .codResponse(400)
@@ -48,45 +53,24 @@ public class CarsImpl implements ServiceCars {
                         .build();
             }
 
-            Products products = productRepository.findByIdProduc(car.idProduct());
+            Products products = productRepository.findByIdProduc(car.getIdProduct());
             if (products != null){
-                if (car.quantity() > products.getQuantityProduct()){
-                    return ResponseGeneric
-                            .builder()
-                            .codResponse(400)
-                            .status("Bad Request")
-                            .message("No se pueden vender mas productos de los que existen, solo quedan: "+products.getQuantityProduct())
-                            .build();
-                }
-                if (car.quantity() < products.getQuantityProduct()){
+                if (car.getQuantity() != null){
 
-                    var newQuantity = products.getQuantityProduct() - car.quantity();
+                    var newQuantity = products.getQuantityProduct() - car.getQuantity();
                     products.setQuantityProduct(newQuantity);
                     productRepository.save(products);
-
-
                     /* Kardex*/
-                    SystemKardex systemKardex = new SystemKardex();
+                    operationKardex.exitKardex(car, products);
 
-                    var Value = products.getValueProduct() * car.quantity();
 
-                    systemKardex.setName(products.getNameProduct());
-                    systemKardex.setUnit(products.getUnitProduct());
-                    systemKardex.setSupplier(products.getSupplier());
-                    systemKardex.setDate(new Date());
-                    systemKardex.setValue(products.getValueProduct());
-                    systemKardex.setQuantityDepartures(car.quantity());
-                    systemKardex.setValueDepartures(Value);
-                    systemKardex.setQuantityBalance(products.getQuantityProduct());
-                    systemKardex.setValueBalance(Value);
-                    kardexRepository.save(systemKardex);
                 }
             }
 
-            Users users = userRepository.findByIdUsers(car.idUser());
+            Users users = userRepository.findByIdUsers(car.getIdUser());
 
             if(car != null){
-                cars1.setQuantity(car.quantity());
+                cars1.setQuantity(car.getQuantity());
                 cars1.setIdProduct(products);
                 cars1.setIdUser(users);
                 cars1.setTotal(cars1.getTotal());

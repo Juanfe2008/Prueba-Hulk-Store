@@ -12,7 +12,6 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Accessors(fluent = true)
 public class KardexDto {
 
 

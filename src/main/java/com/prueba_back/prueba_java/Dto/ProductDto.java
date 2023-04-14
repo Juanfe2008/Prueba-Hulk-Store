@@ -4,32 +4,29 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.Accessors;
 
-@Data
-@Builder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Accessors(fluent = true)
 public class ProductDto {
 
     @JsonProperty("id")
     private Long id;
 
-    @JsonProperty("name")
-    private String name;
+    @JsonProperty("nameProduct")
+    private String nameProduct;
 
-    @JsonProperty("value")
-    private Float value;
+    @JsonProperty("valueProduct")
+    private Float valueProduct;
 
-    @JsonProperty("weight")
-    private String weight;
+    @JsonProperty("weightProduct")
+    private String weightProduct;
 
-    @JsonProperty("quantity")
-    private Long quantity;
+    @JsonProperty("quantityProduct")
+    private Long quantityProduct;
 
-    @JsonProperty("unit")
-    private String unit;
+    @JsonProperty("unitProduct")
+    private String unitProduct;
 
     @JsonProperty("supplier")
     private String supplier;

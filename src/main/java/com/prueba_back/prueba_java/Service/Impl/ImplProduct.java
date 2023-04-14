@@ -30,7 +30,7 @@ public class ImplProduct implements ServiceProduct {
     public ResponseGeneric save(ProductDto productDto) {
         try {
 
-            if (Objects.isNull(productDto) || productDto.name().isEmpty()){
+            if (Objects.isNull(productDto) || productDto.getNameProduct().isEmpty()){
                 return ResponseGeneric
                         .builder()
                         .codResponse(400)
@@ -42,15 +42,15 @@ public class ImplProduct implements ServiceProduct {
             /* Kardex*/
             operationKardex.saveKardex(productDto);
 
-            var mapper = new ModelMapper();
-            var products = mapper.map(productDto, Products.class);
+            ModelMapper mapper = new ModelMapper();
+            Products products = mapper.map(productDto, Products.class);
             productRepository.save(products);
 
             return ResponseGeneric
                     .builder()
                     .codResponse(201)
                     .status("Ok")
-                    .message("Producto actualizado exitosamente")
+                    .message("Producto guardado exitosamente")
                     .objectGeneric(products)
                     .build();
 
@@ -153,7 +153,7 @@ public class ImplProduct implements ServiceProduct {
             /* Kardex*/
             operationKardex.saveKardex(productDto);
 
-            var productsUpdate = productRepository.findByIdProduc(productDto.id());
+            var productsUpdate = productRepository.findByIdProduc(productDto.getId());
             if (Objects.isNull(productsUpdate)){
                 return ResponseGeneric
                         .builder()
@@ -163,7 +163,7 @@ public class ImplProduct implements ServiceProduct {
                         .build();
             }
 
-            var NewQuantity = productDto.quantity() + productsUpdate.getQuantityProduct();
+            var NewQuantity = productDto.getQuantityProduct() + productsUpdate.getQuantityProduct();
             var mapper = new ModelMapper();
             var products = mapper.map(productDto, Products.class);
             products.setQuantityProduct(NewQuantity);
