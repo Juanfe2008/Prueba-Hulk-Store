@@ -19,8 +19,11 @@ public class CarDto {
     @JsonProperty("idProduct")
     private Long idProduct;
 
-    @JsonProperty("cantidad")
-    private Long cantidad;
+    @JsonProperty("quantity")
+    private Long quantity;
+
+    @JsonProperty("total")
+    private Long total;
 
 	
 

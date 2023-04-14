@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class CarsImpl implements ServiceCars {
@@ -37,57 +38,58 @@ public class CarsImpl implements ServiceCars {
     public ResponseGeneric save(CarDto car) {
         try{
             Cars cars1 = new Cars();
-            if (car.idProduct() != null){
-                Products products = productRepository.findByIdProduc(car.idProduct());
-                if (products != null){
-                    if (car.cantidad() > products.getQuantityProduct()){
-                        return ResponseGeneric
-                                .builder()
-                                .codResponse(400)
-                                .status("Bad Request")
-                                .message("No se pueden vender mas productos de los que existen, solo quedan: "+products.getQuantityProduct())
-                                .build();
-                    }
-                    if (car.cantidad() < products.getQuantityProduct()){
-                        /*productRepository.deleteById(products.getId());*/
-                        Products products1 = new Products();
 
-                        Long newQuantity = products.getQuantityProduct() - car.cantidad();
-
-                        products1.setId(products.getId());
-                        products1.setNameProduct(products.getNameProduct());
-                        products1.setValueProduct(products.getValueProduct());
-                        products1.setWeightProduct(products.getWeightProduct());
-                        products1.setQuantityProduct(newQuantity);
-                        productRepository.save(products1);
-
-
-                        /* Kardex*/
-                        SystemKardex systemKardex = new SystemKardex();
-
-                        Float Value = products.getValueProduct() * car.cantidad();
-
-                        systemKardex.setName(products.getNameProduct());
-                        systemKardex.setUnit(products.getUnitProduct());
-                        systemKardex.setSupplier(products.getSupplier());
-                        systemKardex.setDate(new Date());
-                        systemKardex.setValue(products.getValueProduct());
-                        systemKardex.setQuantityDepartures(car.cantidad());
-                        systemKardex.setValueDepartures(Value);
-                        systemKardex.setQuantityBalance(products.getQuantityProduct());
-                        systemKardex.setValueBalance(Value);
-                        kardexRepository.save(systemKardex);
-                    }
-                }
+            if (Objects.isNull(car.idProduct())){
+                return ResponseGeneric
+                        .builder()
+                        .codResponse(400)
+                        .status("Bad request")
+                        .message("No se envio ningun id de producto")
+                        .build();
             }
 
             Products products = productRepository.findByIdProduc(car.idProduct());
+            if (products != null){
+                if (car.quantity() > products.getQuantityProduct()){
+                    return ResponseGeneric
+                            .builder()
+                            .codResponse(400)
+                            .status("Bad Request")
+                            .message("No se pueden vender mas productos de los que existen, solo quedan: "+products.getQuantityProduct())
+                            .build();
+                }
+                if (car.quantity() < products.getQuantityProduct()){
+
+                    var newQuantity = products.getQuantityProduct() - car.quantity();
+                    products.setQuantityProduct(newQuantity);
+                    productRepository.save(products);
+
+
+                    /* Kardex*/
+                    SystemKardex systemKardex = new SystemKardex();
+
+                    var Value = products.getValueProduct() * car.quantity();
+
+                    systemKardex.setName(products.getNameProduct());
+                    systemKardex.setUnit(products.getUnitProduct());
+                    systemKardex.setSupplier(products.getSupplier());
+                    systemKardex.setDate(new Date());
+                    systemKardex.setValue(products.getValueProduct());
+                    systemKardex.setQuantityDepartures(car.quantity());
+                    systemKardex.setValueDepartures(Value);
+                    systemKardex.setQuantityBalance(products.getQuantityProduct());
+                    systemKardex.setValueBalance(Value);
+                    kardexRepository.save(systemKardex);
+                }
+            }
+
             Users users = userRepository.findByIdUsers(car.idUser());
 
             if(car != null){
-                cars1.setQuantity(car.cantidad());
+                cars1.setQuantity(car.quantity());
                 cars1.setIdProduct(products);
                 cars1.setIdUser(users);
+                cars1.setTotal(cars1.getTotal());
                 carRepository.save(cars1);
                 return ResponseGeneric
                         .builder()
