@@ -1,17 +1,13 @@
 package com.prueba_back.prueba_java.Service;
 
 import com.prueba_back.prueba_java.Dto.CarDto;
-import com.prueba_back.prueba_java.Entity.Cars;
-import com.prueba_back.prueba_java.Response.CarResponse;
-import com.prueba_back.prueba_java.Response.CarSaveResponse;
-
-import java.util.List;
+import com.prueba_back.prueba_java.Response.ResponseGeneric;
 
 public interface ServiceCars {
 
-    CarSaveResponse save(CarDto car);
+    ResponseGeneric save(CarDto car);
 
-    CarResponse listAll();
+    ResponseGeneric listAll();
 
-    List<Cars> listByUser(Long idUser);
+    ResponseGeneric listByUser(Long idUser);
 }

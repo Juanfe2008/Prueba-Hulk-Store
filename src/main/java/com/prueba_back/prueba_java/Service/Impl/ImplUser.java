@@ -39,7 +39,12 @@ public class ImplUser implements ServiceUser {
             }
             return ResponseGeneric.builder().codResponse(400).status("Bad Request").message("Error al guardar, no envio los datos").build();
         }catch (Exception e){
-            return ResponseGeneric.builder().codResponse(400).status("Bad Request").message(e.toString()).build();
+            return ResponseGeneric
+                    .builder()
+                    .codResponse(400)
+                    .status("Bad Request")
+                    .message(e.getMessage())
+                    .build();
         }
 
 

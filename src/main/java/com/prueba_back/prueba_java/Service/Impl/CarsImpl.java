@@ -5,17 +5,16 @@ import com.prueba_back.prueba_java.Entity.Cars;
 import com.prueba_back.prueba_java.Entity.SystemKardex;
 import com.prueba_back.prueba_java.Entity.Products;
 import com.prueba_back.prueba_java.Entity.Users;
-import com.prueba_back.prueba_java.Mappers.CarMapper;
 import com.prueba_back.prueba_java.Repository.CarsRepository;
 import com.prueba_back.prueba_java.Repository.KardexRepository;
 import com.prueba_back.prueba_java.Repository.ProductRepository;
 import com.prueba_back.prueba_java.Repository.UserRepository;
-import com.prueba_back.prueba_java.Response.CarResponse;
-import com.prueba_back.prueba_java.Response.CarSaveResponse;
+import com.prueba_back.prueba_java.Response.ResponseGeneric;
 import com.prueba_back.prueba_java.Service.ServiceCars;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -34,21 +33,20 @@ public class CarsImpl implements ServiceCars {
     @Autowired
     UserRepository userRepository;
 
-    @Autowired
-    CarMapper carMapper;
-
-
-
-
     @Override
-    public CarSaveResponse save(CarDto car) {
+    public ResponseGeneric save(CarDto car) {
         try{
             Cars cars1 = new Cars();
             if (car.idProduct() != null){
                 Products products = productRepository.findByIdProduc(car.idProduct());
                 if (products != null){
                     if (car.cantidad() > products.getQuantityProduct()){
-                        return carMapper.toResponseCarSave(null,400,"No se puede comprar mas productos de los que hay en existencia","400");
+                        return ResponseGeneric
+                                .builder()
+                                .codResponse(400)
+                                .status("Bad Request")
+                                .message("No se pueden vender mas productos de los que existen, solo quedan: "+products.getQuantityProduct())
+                                .build();
                     }
                     if (car.cantidad() < products.getQuantityProduct()){
                         /*productRepository.deleteById(products.getId());*/
@@ -91,36 +89,90 @@ public class CarsImpl implements ServiceCars {
                 cars1.setIdProduct(products);
                 cars1.setIdUser(users);
                 carRepository.save(cars1);
-                return carMapper.toResponseCarSave(cars1,201,"Registro agregado al carro agregado exitosamente","201");
+                return ResponseGeneric
+                        .builder()
+                        .codResponse(201)
+                        .status("Created")
+                        .message("Producto agregado exitosamente al carrito")
+                        .objectGeneric(users)
+                        .build();
+
             }
-            return carMapper.toResponseCarSave(null,201,"Registro agregado al carro agregado exitosamente","201");
+            return ResponseGeneric
+                    .builder()
+                    .codResponse(400)
+                    .status("Bad request")
+                    .message("No se a podido guardar en el carrito")
+                    .build();
 
         }catch (Exception e){
-            return carMapper.toResponseCarSave(null, 400, e.toString(),
-                    "400");
+            return ResponseGeneric
+                    .builder()
+                    .codResponse(400)
+                    .status("Bad Request")
+                    .message(e.getMessage())
+                    .build();
         }
 
 
     }
 
     @Override
-    public CarResponse listAll() {
-
+    public ResponseGeneric listAll() {
         try {
-            List<Cars> cars = carRepository.findAll();
-            return carMapper.toResponseCarDto(cars,200,"Lista Consultada con exito","200");
-        }catch (Exception e){
-            return CarResponse.builder()
+            var cars = carRepository.findAll();
+            if (cars.isEmpty()){
+                ResponseGeneric
+                        .builder()
+                        .codResponse(204)
+                        .status("Not Content")
+                        .message("No se a podido listar en el carrito")
+                        .build();
+            }
+            return ResponseGeneric
+                    .builder()
                     .codResponse(400)
-                    .message(e.toString())
-                    .status("400")
+                    .status("Bad request")
+                    .message("No se a podido guardar en el carrito")
+                    .listObjectGeneric(Collections.singletonList(cars))
+                    .build();
+        }catch (Exception e){
+            return ResponseGeneric
+                    .builder()
+                    .codResponse(400)
+                    .status("Bad Request")
+                    .message(e.getMessage())
                     .build();
         }
     }
 
     @Override
-    public List<Cars> listByUser(Long idUser) {
-        List<Cars> cars = carRepository.findByIdUser(idUser);
-        return cars;
+    public ResponseGeneric listByUser(Long idUser) {
+        try {
+            List<Cars> cars = carRepository.findByIdUser(idUser);
+            if (cars.isEmpty()){
+               return ResponseGeneric
+                        .builder()
+                        .codResponse(204)
+                        .status("Not Content")
+                        .message("No se a podido listar en el carrito por usuario")
+                        .build();
+            }
+            return ResponseGeneric
+                    .builder()
+                    .codResponse(400)
+                    .status("Bad request")
+                    .message("No se a podido guardar en el carrito")
+                    .listObjectGeneric(Collections.singletonList(cars))
+                    .build();
+        }catch (Exception e){
+          return  ResponseGeneric
+                    .builder()
+                    .codResponse(400)
+                    .status("Bad Request")
+                    .message(e.getMessage())
+                    .build();
+        }
+
     }
 }

@@ -38,9 +38,9 @@ public class ProductController {
     }
 
     @PutMapping(value = "/update")
-    public ResponseEntity<ResponseGeneric> productsUpdate(@RequestBody ProductDto productDto){
+    public ResponseEntity<ResponseGeneric> productsUpdate(@RequestBody ProductDto productDto,@PathVariable Long id){
 
-        return new ResponseEntity<>(productService.save(productDto),HttpStatus.CREATED);
+        return new ResponseEntity<>(productService.update(id,productDto),HttpStatus.CREATED);
     }
 
     @DeleteMapping(value = "/delete/{id}")
