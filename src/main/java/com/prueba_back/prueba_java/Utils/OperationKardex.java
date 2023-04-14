@@ -76,6 +76,7 @@ public class OperationKardex {
         systemKardex.setUnit(products.getUnitProduct());
         systemKardex.setSupplier(products.getSupplier());
         systemKardex.setDate(new Date());
+        systemKardex.setValue(products.getValueProduct());
         systemKardex.setQuantityDepartures(carDto.getQuantity());
         systemKardex.setValueDepartures(Value);
         systemKardex.setQuantityTickets(Math.abs(contador));
